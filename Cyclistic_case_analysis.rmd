@@ -1,0 +1,46 @@
+---
+title: "CyclisticCaseStudy"
+author: "Nate"
+date: "2022-12-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Cyclistic Bikeshare Case Study
+
+#### Intro
+
+In this scenario, the marketing department of the Cyclistic bikeshare company is seeking to evaluate possible opportunities to convert casual users (those who make short-term or daily use of the bikeshares) to annual members (who pay an annual subscription and are more profitable). Having been asked to analyze the data, I will develop a report documenting my analysis and the conclusions I found concerning the differences between casual riders and annual members. 
+
+To answer this question, analysis will be performed on rideshare data from the past 12 months: **December 2021 through November 2022**. I will highlight 5 key insights from this data and make a final recommendation on possible opportunities to convert casual users to annual members. 
+
+#### Sourcing the data
+
+I have been directed to use public data located at <https://divvy-tripdata.s3.amazonaws.com/index.html> for this analysis. Having downloaded the zip files for the previous 12 months, I unzipped them and moved the csv data files to my project directory to open them in RStudio.
+
+I opened the files in R as dataframes and placed them into a list. I used the sapply() function on the list to inspect each dataframe before combining them.
+
+Upon examining the data, I discovered that certains subsets of this dataset do not include any data on the start and end stations of trips. This will be something to bear in mind when doing any calculations. I filtered the data to only include observances with both a start station and end station value.
+
+
+
+
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
