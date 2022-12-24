@@ -21,9 +21,22 @@ To answer this question, analysis will be performed on rideshare data from the p
 
 I have been directed to use public data located at <https://divvy-tripdata.s3.amazonaws.com/index.html> for this analysis. Having downloaded the zip files for the previous 12 months, I unzipped them and moved the csv data files to my project directory to open them in RStudio.
 
-I opened the files in R as dataframes and placed them into a list. I used the sapply() function on the list to inspect each dataframe before combining them.
 
-Upon examining the data, I discovered that certains subsets of this dataset do not include any data on the start and end stations of trips. This will be something to bear in mind when doing any calculations. I filtered the data to only include observances with both a start station and end station value.
+#### Inspecting the data
+
+I opened the files in R as dataframes and placed them into a list. I used the sapply() function on the list to inspect each dataframe before combining them. I verified that the column names and data types were consistent before combining the data from each month into one large dataframe.
+
+I also confirmed that there are three different bike types and two different types of members, as expected. I discovered that certain subsets of this data do not include any data on the start and end stations of trips. There were approximately 800k observances like this. It will be something to bear in mind when working with this data. 
+
+It seemed to be certain months that contained many observances missing this information, although those observances did include latitude and longitude data which could perhaps be used to determine the stations. These observances did contain the other information such as start and end time, member status and bike type. These are the more relevant factors in context of the business question being investigated, so although it is something to keep in mind, it should not have any bearing on the current analysis. No other columns had any significant amount of missing data.
+
+Lastly, I confirmed that the columns had a consistent datetime format and verified that I could filter out some cases (such as the observances without station names) if necessary. However, as stated above, I decided it would not be necessary, unless there is some way the empty columns reflect on the integrity of those observances.
+
+
+#### Preparing the data
+
+I added the following columns to the dataset for convenience in analysis. I made columns for days of the week and for months, to compare rider behavior on different days and months. I also calculated trip duration in a new column based on the start and end time columns.
+
 
 
 

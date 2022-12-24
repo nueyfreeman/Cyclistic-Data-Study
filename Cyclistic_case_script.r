@@ -17,8 +17,8 @@ sep2022 <- read.csv("Past12Data/202209-divvy-publictripdata.csv")
 oct2022 <- read.csv("Past12Data/202210-divvy-tripdata.csv")
 nov2022 <- read.csv("Past12Data/202211-divvy-tripdata.csv")
 
-past12 <- c(dec2021, jan2022, feb2022, mar2022, apr2022, may2022, 
-            + jun2022, jul2022, aug2022, sep2022, oct2022, nov2022)
+past12 <- list(dec2021, jan2022, feb2022, mar2022, apr2022, may2022, 
+            jun2022, jul2022, aug2022, sep2022, oct2022, nov2022)
 
 sapply(past12, colnames)
 sapply(past12, str)
@@ -26,7 +26,7 @@ sapply(past12, str)
 full_year <- bind_rows(past12)
 
 with_station <- filter(full_year, 
-                  + start_station_name != "" & end_station_name != "")
+                  start_station_name != "" & end_station_name != "")
 
 
 
