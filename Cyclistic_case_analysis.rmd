@@ -1,5 +1,5 @@
 ---
-title: "CyclisticCaseStudy"
+title: "Cyclistic Case Study"
 author: "Nate"
 date: "2022-12-21"
 output: html_document
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #### Intro
 
-In this scenario, the marketing department of the Cyclistic bikeshare company is seeking to evaluate possible opportunities to convert casual users (those who make short-term or daily use of the bikeshares) to annual members (who pay an annual subscription and are more profitable). Having been asked to analyze the data, I will develop a report documenting my analysis and the conclusions I found concerning the differences between casual riders and annual members. 
+In this scenario, the marketing department of the Cyclistic bikeshare company is seeking to evaluate possible opportunities to convert casual users (those who make short-term or daily use of the bikeshares) to annual members (who pay a subscription and are more profitable). Having been asked to analyze the data, I will develop a report documenting my analysis and the conclusions I found concerning the differences between casual riders and annual members. 
 
 To answer this question, analysis will be performed on rideshare data from the past 12 months: **December 2021 through November 2022**. I will highlight 5 key insights from this data and make a final recommendation on possible opportunities to convert casual users to annual members. 
 
@@ -24,7 +24,7 @@ I have been directed to use public data located at <https://divvy-tripdata.s3.am
 
 #### Inspecting the data
 
-I opened the files in R as dataframes and placed them into a list. I used the sapply() function on the list to inspect each dataframe before combining them. I verified that the column names and data types were consistent before combining the data from each month into one large dataframe.
+I opened the files in R as dataframes and inspected each before combining them. I verified that the column names and data types were consistent then joined the data from each month into one large dataframe.
 
 I also confirmed that there are three different bike types and two different types of members, as expected. I discovered that certain subsets of this data do not include any data on the start and end stations of trips. There were approximately 800k observances like this. It will be something to bear in mind when working with this data. 
 
@@ -36,6 +36,16 @@ Lastly, I confirmed that the columns had a consistent datetime format and verifi
 #### Preparing the data
 
 I added the following columns to the dataset for convenience in analysis. I made columns for days of the week and for months, to compare rider behavior on different days and months. I also calculated trip duration in a new column based on the start and end time columns.
+
+Before analyzing the data, I removed all observations without an entry for `start_station_name` and `end_station_name` so that there would be no question of data integrity where those observations are concerned.
+
+After observing the data both in a histogram and as quartile values, I also elected to eliminate any trips with a duration of more than 1 hour or less than 0 minutes. The data gives no definite answer to how these values were found, but based on the station names and ids, the implication is that many of these may have referred to bikes taken out for maintenance or electric bikes taken out to be charged. Because these accounted for only a tiny percentage of the total observations, I eliminated them as outliers. Trips most frequently lasted between 0 and 30 minutes, which was further evidence that it was appropriate to conclude that trips longer than a couple hours, or even days long in some cases, referred to a different situation entirely than the one I was investigating. 
+
+Lastly, I noticed that the majority of these outliers I eliminated had `docked_bike` listed as the `rideable_type`. `docked_bike` accounted for a small percentage of the total rides, was always designated as `casual`, and had an average duration of approximately 2 hours - far more than the other bike types. For these reasons, I decided to eliminate all `docked_bike` observations as well, for the purpose of doing calculations. 
+
+#### Analyzing the data
+
+
 
 
 
