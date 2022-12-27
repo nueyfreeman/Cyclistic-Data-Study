@@ -37,7 +37,7 @@ Lastly, I confirmed that the columns had a consistent datetime format and verifi
 
 I added the following columns to the dataset for convenience in analysis. I made columns for days of the week and for months, to compare rider behavior on different days and months. I also calculated trip duration in a new column based on the start and end time columns.
 
-Before analyzing the data, I removed all observations without an entry for `start_station_name` and `end_station_name` so that there would be no question of data integrity where those observations are concerned.
+Before analyzing the data, I removed all observations without an entry for `start_station_name` and `end_station_name` so that there would be no question of data integrity where those observations are concerned. I confirmed that those weren't concentrated on a particular day or month before removing them.
 
 After observing the data both in a histogram and as quartile values, I also elected to eliminate any trips with a duration of more than 1 hour or less than 0 minutes. The data gives no definite answer to how these values were found, but based on the station names and ids, the implication is that many of these may have referred to bikes taken out for maintenance or electric bikes taken out to be charged. Because these accounted for only a tiny percentage of the total observations, I eliminated them as outliers. Trips most frequently lasted between 0 and 30 minutes, which was further evidence that it was appropriate to conclude that trips longer than a couple hours, or even days long in some cases, referred to a different situation entirely than the one I was investigating. 
 
