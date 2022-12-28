@@ -3,8 +3,8 @@ title: "Cyclistic Case Study"
 author: "Nate"
 date: "2022-12-21"
 output:
-  word_document: default
   html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -19,39 +19,250 @@ In this scenario, the marketing department of the Cyclistic Bikeshare Company in
 
 To answer this question, analysis will be performed on rideshare data from the past 12 months: **December 2021 through November 2022**. I will highlight 3 key insights from this data and make a final recommendation on possible opportunities to convert casual users to annual members. 
 
+```{r Loading Libraries, include=FALSE}
+# Install packages
+install.packages('tidyverse')
+install.packages('skimr')
+install.packages('janitor')
+
+# Loading libraries
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(skimr)
+library(janitor)
+library(hms)
+```
+
+***
+
 #### Sourcing the data
 
 I have been directed to use public data located at <https://divvy-tripdata.s3.amazonaws.com/index.html> for this analysis. Having downloaded the zip files for the previous 12 months, I unzipped them and moved the csv data files to my project directory to open them in RStudio. This is bikeshare data from an actual bikeshare program in Chicago called Divvy, which will be used as a stand-in for relevant proprietary in-house data from the fictional company Cyclistic.
+
+``` {r Reading in Data, include=FALSE}
+# Read in raw data
+dec2021 <- read.csv("Past12Data/202112-divvy-tripdata.csv")
+jan2022 <- read.csv("Past12Data/202201-divvy-tripdata.csv")
+feb2022 <- read.csv("Past12Data/202202-divvy-tripdata.csv")
+mar2022 <- read.csv("Past12Data/202203-divvy-tripdata.csv")
+apr2022 <- read.csv("Past12Data/202204-divvy-tripdata.csv")
+may2022 <- read.csv("Past12Data/202205-divvy-tripdata.csv")
+jun2022 <- read.csv("Past12Data/202206-divvy-tripdata.csv")
+jul2022 <- read.csv("Past12Data/202207-divvy-tripdata.csv")
+aug2022 <- read.csv("Past12Data/202208-divvy-tripdata.csv")
+sep2022 <- read.csv("Past12Data/202209-divvy-publictripdata.csv")
+oct2022 <- read.csv("Past12Data/202210-divvy-tripdata.csv")
+nov2022 <- read.csv("Past12Data/202211-divvy-tripdata.csv")
+
+past12 <- list(dec2021, jan2022, feb2022, mar2022, apr2022, may2022, 
+            jun2022, jul2022, aug2022, sep2022, oct2022, nov2022)
+```
 
 
 #### Inspecting the data
 
 I opened the files in R as dataframes and inspected each before combining them. I verified that the column names and data types were consistent then joined the data from each month into one large dataframe.
 
+```{r Inspect Data, eval=FALSE}
+# Inspect raw data before combining
+sapply(past12, colnames)
+sapply(past12, str)
+```
+
+``` {r Join Data}
+# Combine raw data into one dataframe
+full_year <- bind_rows(past12)
+```
+
 I also confirmed that there are three different bike types and two different types of members, as expected. I discovered that certain subsets of this data do not include any data on the start and end stations of trips. There were approximately 800k observances like this. It will be something to bear in mind when working with this data. 
+
+``` {r Inspecting Joined Data}
+# Inspect single dataframe
+full_year %>% group_by(member_casual) %>% summarize()
+full_year %>% group_by(rideable_type) %>% summarize()
+skim_without_charts(full_year)
+```
 
 It seemed to be certain months that contained many observances missing this information, although those observances did include latitude and longitude data which could perhaps be used to determine the stations. These observances did contain the other information such as start and end time, member status and bike type. These are the more relevant factors in context of the business question being investigated, so although it is something to keep in mind, it should not have any bearing on the current analysis. No other columns had any significant amount of missing data.
 
 Lastly, I confirmed that the columns had a consistent datetime format and verified that I could filter out some cases (such as the observances without station names) if necessary. However, as stated above, I decided it would not be necessary, unless there is some way the empty columns reflect on the integrity of those observances.
+
+``` {r Removing Unwanted Observances, eval=FALSE}
+# Data without dropped stations
+with_station <- filter(full_year, 
+                  start_station_name != "" & end_station_name != "")
+```
 
 
 #### Preparing the data
 
 I added the following columns to the dataset for convenience in analysis. I made columns for days of the week and for months, to compare rider behavior on different days and months. I also calculated trip duration in a new column based on the start and end time columns.
 
+``` {r Adding Columns, echo=TRUE, include=FALSE}
+# Add columns to use in analysis
+all_trips <- full_year %>% mutate(
+  month = month(started_at, label=TRUE, abbr=TRUE), 
+  day = wday(started_at, label=TRUE, abbr=TRUE), 
+  trip_duration = as_hms(difftime(ended_at, started_at)))
+
+all_trips <- mutate(all_trips, 
+                    duration_as_mins = as.numeric(trip_duration)/60)
+```
+
 Before analyzing the data, I removed all observations without an entry for `start_station_name` and `end_station_name` so that there would be no question of data integrity where those observations are concerned. I confirmed that those weren't concentrated on a particular day or month before removing them.
 
 After observing the data both in a histogram and as quartile values, I also elected to eliminate any trips with a duration of more than 1 hour or less than 0 minutes. The data gives no definite answer to how these values were found, but based on the station names and ids, the implication is that many of these may have referred to bikes taken out for maintenance or electric bikes taken out to be charged. Because these accounted for only a tiny percentage of the total observations, I eliminated them as outliers. Trips most frequently lasted between 0 and 30 minutes, which was further evidence that it was appropriate to conclude that trips longer than a couple hours, or even days long in some cases, referred to a different situation entirely than the one I was investigating. 
 
+``` {r Summarize Dataset}
+all_trips %>% 
+  group_by(rideable_type) %>% 
+  summarize(mean_duration = mean(duration_as_mins), 
+            max_duration = max(duration_as_mins), 
+            min_duration = min(duration_as_mins))
+```
+
 Lastly, I noticed that the majority of these outliers I eliminated had `docked_bike` listed as the `rideable_type`. `docked_bike` accounted for a small percentage of the total rides, was always designated as `casual`, and had an average duration of approximately 2 hours - far more than the other bike types. For these reasons, I decided to eliminate all `docked_bike` observations as well, for the purpose of doing calculations. 
+
+``` {r Cleaning the Data}
+# Use previous observations to clean data
+clean_trips <- all_trips %>% 
+  filter(rideable_type != 'docked_bike') %>% 
+  filter(duration_as_mins > 0 & duration_as_mins < 60)
+
+cleanv2 <- clean_trips %>% 
+  filter(start_station_name != "" & end_station_name != "")
+
+
+# Validate the data that's been removed
+clean_missing_stations <- clean_trips %>% 
+  filter(start_station_name == "" | end_station_name == "")
+
+clean_missing_stations %>% group_by(month) %>% summary()
+clean_missing_stations %>% group_by(month) %>% count()
+```
+
 
 #### Analyzing the data
 
 I created a new dataframe to use for analysis which reflected those refinements of the original data. I first inspected quartile and mean values for ride duration in this dataset, then the same measures aggregated by user type, bike type, day and month. They showed significant difference in ride length between types of users overall. Bike type did not appear to differ significantly between types of users. 
 
+``` {r Summarize the Data}
+# Inspect cleaned data
+summary(cleanv2$duration_as_mins)
+
+aggregate(cleanv2$duration_as_mins ~ cleanv2$member_casual, 
+          FUN = summary)
+
+aggregate(
+  cleanv2$duration_as_mins ~ cleanv2$member_casual + cleanv2$day, 
+  FUN = mean)
+```
+
+``` {r Make Summary Dataframe}
+# Make a summary set for analysis
+ctrips_by_duration <- cleanv2 %>% 
+  group_by(rideable_type, member_casual, day, month) %>% 
+  summarize(num_rides = n(), 
+            avg_ride = mean(duration_as_mins), 
+            median_ride = median(duration_as_mins)) %>% 
+  arrange(month, day, member_casual, rideable_type)
+```
+
 I also recodified the trip start time so that I could view the data in histogram form and compare peak usage times for different types of users. It showed that bike usage peaked in the late afternoon, when people are done with work or school, but that for subscription members there was a second peak coinciding with the morning commute. Casual riders showed no spike in usage during the morning hours.
 
+```{r Analyze by Time of Day, echo=TRUE}
+# Adding column for time-of-day histogram
+cleanv2 <- cleanv2 %>% 
+  mutate(start_time = (hour(started_at) * 60) + 
+           minute(started_at) + 
+           (second(started_at) / 60))
+```
+
+``` {r Visualize Time of Day, echo=FALSE}
+# Visualizing histogram
+ggplot(data = cleanv2) + 
+  geom_histogram(mapping = aes(x = start_time, 
+                               fill = member_casual), 
+                 binwidth = 60, # larger binwidth equals less bins
+                 position = 'dodge') + 
+  labs(title='Daily Ridership by Time of Day',
+       x='Time of Day (in minutes)',
+       y='Number of Rides')
+```
+
 The data also displayed significant differences in usage between types of users depending on the month and day of the week. By aggregating number of rides, I identified weekdays and winter months as times when member users vastly outnumber casual users, marking a key difference in their usage patterns.
+
+```{r Visualize with Plots, echo=FALSE}
+# Visualize with plots
+ggplot(data = ctrips_by_duration) + 
+  geom_col(mapping = aes(x=day, y=num_rides, fill=member_casual), 
+           position="dodge") + 
+  labs(title='Daily Rides', 
+       subtitle = 'by rider type', 
+       y = 'Number of Rides', 
+       x = 'Day of the Week')
+
+ggplot(data = ctrips_by_duration) + 
+  geom_col(mapping = aes(x=day, y=num_rides, fill=member_casual)) + 
+  labs(title='Daily Rides', 
+       subtitle = 'by rider type', 
+       y = 'Number of Rides', 
+       x = 'Day of the Week')
+
+ggplot(data = ctrips_by_duration) + 
+  geom_col(mapping = aes(x=month, y=num_rides, fill=member_casual), 
+           position="dodge") + 
+  labs(title = 'Monthly Rides', 
+       subtitle = 'by rider type',
+       x = 'Months',
+       y = 'Number of Rides')
+
+ggplot(data = ctrips_by_duration) + 
+  geom_col(mapping = aes(x=month, 
+                         y=num_rides, 
+                         fill=member_casual)) + 
+  labs(title = 'Monthly Rides', 
+       subtitle = 'by rider type',
+       x = 'Months',
+       y = 'Number of Rides')
+
+ggplot(data = ctrips_by_duration) + 
+  geom_col(mapping = aes(x=day, y=avg_ride, fill=member_casual), 
+           position="dodge") + 
+  labs(title = 'Avg Ride Time',
+       subtitle = 'by day',
+       x = 'Day of the Week',
+       y = 'Ride Time')
+
+ggplot(data = ctrips_by_duration) + 
+  geom_col(mapping = aes(x=day, y=median_ride, fill=member_casual),
+           position = 'dodge') + 
+  labs(title = 'Median Ride Time',
+       subtitle = 'by day',
+       x = 'Day of the Week',
+       y = 'Ride Time')
+
+ggplot(data = ctrips_by_duration) + 
+  geom_col(mapping = aes(x=month, y=avg_ride, fill=member_casual), 
+           position="dodge") + 
+  labs(title = 'Avg Ride Time',
+       subtitle = 'by month',
+       x = 'Month',
+       y = 'Ride Time')
+
+ggplot(data = ctrips_by_duration) + 
+  geom_col(mapping = aes(x=month, 
+                         y=median_ride, 
+                         fill=member_casual),
+           position = 'dodge') + 
+  labs(title = 'Median Ride Time',
+       subtitle = 'by month',
+       x = 'Month',
+       y = 'Ride Time')
+```
+
+***
 
 ### Conclusion: The differences between members and casual riders
 

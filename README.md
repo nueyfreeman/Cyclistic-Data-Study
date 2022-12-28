@@ -9,23 +9,23 @@ To answer this question, analysis will be performed on rideshare data from the p
 
 #### Sourcing the data
 
-I have been directed to use public data located at <https://divvy-tripdata.s3.amazonaws.com/index.html> for this analysis. Having downloaded the zip files for the previous 12 months, I unzipped them and moved the csv data files to my project directory to open them in RStudio. This is bikeshare data from an actual bikeshare program in Chicago called Divvy, which will be used as a stand-in for relevant proprietary in-house data from the fictional company Cyclistic.
+I have been directed to use public data located at <https://divvy-tripdata.s3.amazonaws.com/index.html> for this analysis. This is bikeshare data from an actual bikeshare program in Chicago called Divvy, which will be used as a stand-in for relevant proprietary in-house data from the fictional company Cyclistic.
 
 
 #### Inspecting the data
 
 I opened the files in R as dataframes and inspected each before combining them. I verified that the column names and data types were consistent then joined the data from each month into one large dataframe.
 
-I also confirmed that there are three different bike types and two different types of members, as expected. I discovered that certain subsets of this data do not include any data on the start and end stations of trips. There were approximately 800k observances like this. It will be something to bear in mind when working with this data. 
+I also confirmed that there are three different bike types (`classic_bike`, `docked_bike`, `electric_bike`) and two different types of members (`member` and `casual`), as expected. I discovered that certain subsets of this data do not include any entry on the start and end stations of trips (`start_station_name`, `end_station_name`). There were approximately 800k observances like this.
 
-It seemed to be certain months that contained many observances missing this information, although those observances did include latitude and longitude data which could perhaps be used to determine the stations. These observances did contain the other information such as start and end time, member status and bike type. These are the more relevant factors in context of the business question being investigated, so although it is something to keep in mind, it should not have any bearing on the current analysis. No other columns had any significant amount of missing data.
+It seemed to be certain months that contained many observances missing this information, although those observances did include latitude and longitude data which could perhaps be used to determine the stations. These observances did contain the other information such as `started_at`, `ended_at`, `member_casual` and `rideable_type`. Those are the more relevant factors in context of the business question under investigation, so the missing stations should not have any bearing on the analysis. No other columns had any significant amount of missing data.
 
-Lastly, I confirmed that the columns had a consistent datetime format and verified that I could filter out some cases (such as the observances without station names) if necessary. However, as stated above, I decided it would not be necessary, unless there is some way the empty columns reflect on the integrity of those observances.
+Lastly, I confirmed that the columns had a consistent datetime format and verified that I could filter out some cases (such as the observances without station names) if necessary. However, as stated above, I decided it would not be necessary, unless the empty columns suggest a lack of data integrity for those observances.
 
 
 #### Preparing the data
 
-I added the following columns to the dataset for convenience in analysis. I made columns for days of the week and for months, to compare rider behavior on different days and months. I also calculated trip duration in a new column based on the start and end time columns.
+I added the following columns to the dataset for convenience in analysis: I made columns for `day` of the week and for `month`, to compare rider behavior on different dates. I also calculated `trip_duration` in a new column based on the `started_at` and `ended_at` columns.
 
 Before analyzing the data, I removed all observations without an entry for `start_station_name` and `end_station_name` so that there would be no question of data integrity where those observations are concerned. I confirmed that those weren't concentrated on a particular day or month before removing them.
 
@@ -35,11 +35,11 @@ Lastly, I noticed that the majority of these outliers I eliminated had `docked_b
 
 #### Analyzing the data
 
-I created a new dataframe to use for analysis which reflected those refinements of the original data. I first inspected quartile and mean values for ride duration in this dataset, then the same measures aggregated by user type, bike type, day and month. They showed significant difference in ride length between types of users overall. Bike type did not appear to differ significantly between types of users. 
+I created a new dataframe to use for analysis which reflected those refinements of the original data. I first inspected quartile and mean values for `duration_as_mins` in this dataset, then the same measures aggregated by `member_casual`, `rideable_type`, `day` and `month`. They showed significant difference in ride length between types of users overall. Bike type did not appear to differ significantly between types of users. 
 
-I also recodified the trip start time so that I could view the data in histogram form and compare peak usage times for different types of users. It showed that bike usage peaked in the late afternoon, when people are done with work or school, but that for subscription members there was a second peak coinciding with the morning commute. Casual riders showed no spike in usage during the morning hours.
+I also recodified the trip start as `start_time` so that I could view the data in histogram form and compare peak usage times for different types of users. It showed that bike usage peaked in the late afternoon, when people are done with work or school, but that for subscription members there was a second peak coinciding with the morning commute. Casual riders showed no spike in usage during the morning hours.
 
-The data also displayed significant differences in usage between types of users depending on the month and day of the week. By aggregating number of rides, I identified weekdays and winter months as times when member users vastly outnumber casual users, marking a key difference in their usage patterns.
+The data also displayed significant differences in usage between types of users depending on the month and day of the week. By aggregating number of rides, I identified weekdays and winter months as times when members vastly outnumber casual users, marking a key difference in their usage patterns.
 
 ### Conclusion: The differences between members and casual riders
 

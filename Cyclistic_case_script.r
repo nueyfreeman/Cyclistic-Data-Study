@@ -194,5 +194,8 @@ ggplot(data = cleanv2) +
   geom_histogram(mapping = aes(x = start_time, 
                                fill = member_casual), 
                  binwidth = 60, # larger binwidth equals less bins
-                 position = 'dodge')
+                 position = 'dodge') + 
+  labs(title='Daily Ridership by Time of Day',
+       x='Time of Day (in minutes)',
+       y='Number of Rides')
 
