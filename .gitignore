@@ -8,4 +8,6 @@ renv/
 renv.lock
 Past12Data/
 Cyclistic_case_analysis.html
+.RDataTmp
+Cyclistic_case_analysis_files/
 

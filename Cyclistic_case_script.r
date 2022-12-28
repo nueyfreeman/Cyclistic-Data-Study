@@ -80,7 +80,7 @@ all_trips %>%
 # Use previous observations to clean data
 clean_trips <- all_trips %>% 
   filter(rideable_type != 'docked_bike') %>% 
-  filter(duration_as_mins > 0 & duration_as_mins < 60)
+  filter(duration_as_mins > 0 & duration_as_mins < 180)
 
 cleanv2 <- clean_trips %>% 
   filter(start_station_name != "" & end_station_name != "")
@@ -150,7 +150,7 @@ ggplot(data = ctrips_by_duration) +
 ggplot(data = ctrips_by_duration) + 
   geom_col(mapping = aes(x=day, y=avg_ride, fill=member_casual), 
            position="dodge") + 
-  labs(title = 'Avg Ride Time',
+  labs(title = 'Average Ride Time',
        subtitle = 'by day',
        x = 'Day of the Week',
        y = 'Ride Time')
@@ -166,7 +166,7 @@ ggplot(data = ctrips_by_duration) +
 ggplot(data = ctrips_by_duration) + 
   geom_col(mapping = aes(x=month, y=avg_ride, fill=member_casual), 
            position="dodge") + 
-  labs(title = 'Avg Ride Time',
+  labs(title = 'Average Ride Time',
        subtitle = 'by month',
        x = 'Month',
        y = 'Ride Time')
