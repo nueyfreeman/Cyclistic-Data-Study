@@ -1,15 +1,3 @@
----
-title: "Cyclistic Case Study"
-author: "Nate"
-date: "2022-12-21"
-output:
-  word_document: default
-  html_document: default
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ## Cyclistic Bikeshare Case Study
 

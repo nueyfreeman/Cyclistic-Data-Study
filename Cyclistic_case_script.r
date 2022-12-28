@@ -58,7 +58,7 @@ all_trips <- full_year %>% mutate(
   trip_duration = as_hms(difftime(ended_at, started_at)))
 
 all_trips <- mutate(all_trips, 
-                    duration_as_mins = as.numeric(trip_duration) / 60)
+                    duration_as_mins = as.numeric(trip_duration)/60)
 
 
 # Visualize and summarize rideable_types
@@ -139,7 +139,9 @@ ggplot(data = ctrips_by_duration) +
        y = 'Number of Rides')
 
 ggplot(data = ctrips_by_duration) + 
-  geom_col(mapping = aes(x=month, y=num_rides, fill=member_casual)) + 
+  geom_col(mapping = aes(x=month, 
+                         y=num_rides, 
+                         fill=member_casual)) + 
   labs(title = 'Monthly Rides', 
        subtitle = 'by rider type',
        x = 'Months',
@@ -170,7 +172,9 @@ ggplot(data = ctrips_by_duration) +
        y = 'Ride Time')
 
 ggplot(data = ctrips_by_duration) + 
-  geom_col(mapping = aes(x=month, y=median_ride, fill=member_casual),
+  geom_col(mapping = aes(x=month, 
+                         y=median_ride, 
+                         fill=member_casual),
            position = 'dodge') + 
   labs(title = 'Median Ride Time',
        subtitle = 'by month',
@@ -187,7 +191,8 @@ cleanv2 <- cleanv2 %>%
 
 # Visualizing histogram
 ggplot(data = cleanv2) + 
-  geom_histogram(mapping = aes(x = start_time, fill = member_casual), 
+  geom_histogram(mapping = aes(x = start_time, 
+                               fill = member_casual), 
                  binwidth = 60, # larger binwidth equals less bins
                  position = 'dodge')
 
